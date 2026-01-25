@@ -1,0 +1,6 @@
+@CentralAddressDatabase_HostAddress = http://localhost:5288
+
+GET {{CentralAddressDatabase_HostAddress}}/api/CentralAddressDatabase/addresses
+Accept: application/json
+
+###

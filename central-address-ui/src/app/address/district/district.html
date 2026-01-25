@@ -1,0 +1,75 @@
+<h2>🏞️ District Management</h2>
+<p>Manage all districts under provinces.</p>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>District Name</th>
+      <th>Province</th>
+      <th>Code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Kathmandu</td>
+      <td>Bagmati</td>
+      <td>KTM</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="form-card">
+  <div class="form-title">Add District</div>
+
+  <form [formGroup]="districtForm" (ngSubmit)="submit()">
+
+    <!-- DISTRICT NAME -->
+    <div class="form-group">
+      <label>District Name</label>
+      <input type="text" formControlName="name">
+
+      <div class="error"
+        *ngIf="districtForm.controls.name.touched && districtForm.controls.name.invalid">
+        Minimum 3 characters required
+      </div>
+    </div>
+
+    <!-- PROVINCE -->
+    <div class="form-group">
+      <label>Province</label>
+      <select formControlName="provinceId">
+        <option value="">Select Province</option>
+        <option value="1">Koshi</option>
+        <option value="2">Madhesh</option>
+        <option value="3">Bagmati</option>
+        <option value="4">Gandaki</option>
+        <option value="5">Lumbini</option>
+        <option value="6">Karnali</option>
+        <option value="7">Sudurpashchim</option>
+      </select>
+
+      <div class="error"
+        *ngIf="districtForm.controls.provinceId.touched && districtForm.controls.provinceId.invalid">
+        Province is required
+      </div>
+    </div>
+
+    <!-- CODE -->
+    <div class="form-group">
+      <label>District Code</label>
+      <input type="text" formControlName="code">
+
+      <div class="error"
+        *ngIf="districtForm.controls.code.touched && districtForm.controls.code.invalid">
+        Code is required (max 4 characters)
+      </div>
+    </div>
+
+    <button class="submit-btn" [disabled]="districtForm.invalid">
+      Save District
+    </button>
+
+  </form>
+</div>

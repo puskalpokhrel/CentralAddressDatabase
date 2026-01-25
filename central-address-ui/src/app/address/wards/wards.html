@@ -1,0 +1,51 @@
+<h2>🏘️ Ward Management</h2>
+
+<div class="form-card">
+  <form [formGroup]="wardForm" (ngSubmit)="submit()">
+
+    <div class="form-group">
+      <label>Ward Number</label>
+      <input type="number" formControlName="wardNumber">
+
+      <div class="error"
+        *ngIf="wardForm.controls.wardNumber.touched && wardForm.controls.wardNumber.invalid">
+        Ward number is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Municipality ID</label>
+      <input type="number" formControlName="municipalityId">
+
+      <div class="error"
+        *ngIf="wardForm.controls.municipalityId.touched && wardForm.controls.municipalityId.invalid">
+        Municipality is required
+      </div>
+    </div>
+
+    <button class="submit-btn" [disabled]="wardForm.invalid">
+      Save Ward
+    </button>
+  </form>
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Ward No</th>
+      <th>Municipality ID</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let w of wards; let i = index">
+      <td>{{ i + 1 }}</td>
+      <td>{{ w.wardNumber }}</td>
+      <td>{{ w.municipalityId }}</td>
+      <td>
+        <button (click)="delete(w.id)">🗑️</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,106 @@
+<h2>🏠 Local Address Management</h2>
+<p>Complete address details linked to province, district, municipality and ward.</p>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Province</th>
+      <th>District</th>
+      <th>Municipality</th>
+      <th>Ward</th>
+      <th>Tole</th>
+      <th>House No</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Bagmati</td>
+      <td>Kathmandu</td>
+      <td>Kathmandu Metropolitan</td>
+      <td>5</td>
+      <td>Baneshwor</td>
+      <td>123</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="form-card">
+  <div class="form-title">Add Local Address</div>
+
+  <form [formGroup]="localAddressForm" (ngSubmit)="submit()">
+
+    <div class="form-group">
+      <label>Province</label>
+      <select formControlName="province">
+        <option value="">Select Province</option>
+        <option>Bagmati</option>
+        <option>Koshi</option>
+        <option>Lumbini</option>
+      </select>
+      <div class="error" *ngIf="localAddressForm.controls.province.touched && localAddressForm.controls.province.invalid">
+        Province is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>District</label>
+      <select formControlName="district">
+        <option value="">Select District</option>
+        <option>Kathmandu</option>
+        <option>Lalitpur</option>
+        <option>Bhaktapur</option>
+      </select>
+      <div class="error" *ngIf="localAddressForm.controls.district.touched && localAddressForm.controls.district.invalid">
+        District is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Municipality</label>
+      <select formControlName="municipality">
+        <option value="">Select Municipality</option>
+        <option>Kathmandu Metropolitan</option>
+        <option>Lalitpur Metropolitan</option>
+      </select>
+      <div class="error" *ngIf="localAddressForm.controls.municipality.touched && localAddressForm.controls.municipality.invalid">
+        Municipality is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Ward</label>
+      <input type="number" formControlName="ward">
+      <div class="error" *ngIf="localAddressForm.controls.ward.touched && localAddressForm.controls.ward.invalid">
+        Ward number is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Tole</label>
+      <input type="text" formControlName="tole">
+      <div class="error" *ngIf="localAddressForm.controls.tole.touched && localAddressForm.controls.tole.invalid">
+        Minimum 3 characters required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Street</label>
+      <input type="text" formControlName="street">
+    </div>
+
+    <div class="form-group">
+      <label>House No</label>
+      <input type="text" formControlName="houseNo">
+      <div class="error" *ngIf="localAddressForm.controls.houseNo.touched && localAddressForm.controls.houseNo.invalid">
+        House number is required
+      </div>
+    </div>
+
+    <button class="submit-btn" [disabled]="localAddressForm.invalid">
+      Save Address
+    </button>
+
+  </form>
+</div>

@@ -1,0 +1,65 @@
+<h2>🏘️ Municipality Management</h2>
+<p>Manage municipalities under districts.</p>
+
+<div class="form-card">
+  <div class="form-title">Add Municipality</div>
+
+  <form [formGroup]="municipalityForm" (ngSubmit)="submit()">
+
+    <div class="form-group">
+      <label>Municipality Name</label>
+      <input type="text" formControlName="name">
+      <div class="error"
+           *ngIf="municipalityForm.controls.name.touched &&
+                  municipalityForm.controls.name.invalid">
+        Minimum 3 characters required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Municipality Type</label>
+      <select formControlName="type">
+        <option value="">Select Type</option>
+        <option>Metropolitan</option>
+        <option>Sub-Metropolitan</option>
+        <option>Municipality</option>
+        <option>Rural Municipality</option>
+      </select>
+      <div class="error"
+           *ngIf="municipalityForm.controls.type.touched &&
+                  municipalityForm.controls.type.invalid">
+        Type is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>District</label>
+      <select formControlName="districtId">
+        <option value="">Select District</option>
+        <option value="1">Kathmandu</option>
+        <option value="2">Lalitpur</option>
+        <option value="3">Bhaktapur</option>
+      </select>
+      <div class="error"
+           *ngIf="municipalityForm.controls.districtId.touched &&
+                  municipalityForm.controls.districtId.invalid">
+        District is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Municipality Code</label>
+      <input type="text" formControlName="code">
+      <div class="error"
+           *ngIf="municipalityForm.controls.code.touched &&
+                  municipalityForm.controls.code.invalid">
+        Code is required (max 5 characters)
+      </div>
+    </div>
+
+    <button class="submit-btn" [disabled]="municipalityForm.invalid">
+      Save Municipality
+    </button>
+
+  </form>
+</div>

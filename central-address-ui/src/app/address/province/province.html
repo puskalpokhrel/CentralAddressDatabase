@@ -1,0 +1,51 @@
+<h2>📍 Province Management</h2>
+<p>Manage all provinces of Nepal.</p>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Province Name</th>
+      <th>Code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Koshi Province</td>
+      <td>KP</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="form-card">
+  <div class="form-title">Add Province</div>
+
+  <form [formGroup]="provinceForm" (ngSubmit)="submit()">
+
+    <div class="form-group">
+      <label>Province Name</label>
+      <input type="text" formControlName="name">
+
+      <div class="error"
+           *ngIf="provinceForm.controls.name.touched && provinceForm.controls.name.invalid">
+        Minimum 3 characters required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Province Code</label>
+      <input type="text" formControlName="code">
+
+      <div class="error"
+           *ngIf="provinceForm.controls.code.touched && provinceForm.controls.code.invalid">
+        Code is required (max 3 characters)
+      </div>
+    </div>
+
+    <button class="submit-btn" [disabled]="provinceForm.invalid">
+      Save Province
+    </button>
+
+  </form>
+</div>

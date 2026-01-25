@@ -1,0 +1,27 @@
+<div class="app">
+
+  <header class="topbar">
+    <div>
+      <h1>Central Address Database</h1>
+      <p>Federal Administrative System of Nepal</p>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <aside class="sidebar">
+      <h3>Address Levels</h3>
+      <a routerLink="/address/province">Province</a>
+      <a routerLink="/address/district">District</a>
+      <a routerLink="/address/municipality">Municipality</a>
+      <a routerLink="/address/wards">Wards</a>
+      <a routerLink="/address/localaddress">Local Address</a>
+    </aside>
+
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>
