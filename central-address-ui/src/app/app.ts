@@ -1,16 +1,17 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ReactiveFormsModule],
+  imports: [
+    RouterModule   // ✅ THIS FIXES EVERYTHING
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class AppComponent {
-  sidebarOpen = false;
+  sidebarOpen = true;
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;

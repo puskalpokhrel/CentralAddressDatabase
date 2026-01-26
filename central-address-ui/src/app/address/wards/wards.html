@@ -41,7 +41,7 @@
   <tbody>
     <tr *ngFor="let w of wards; let i = index">
       <td>{{ i + 1 }}</td>
-      <td>{{ w.wardNumber }}</td>
+      <td>{{ w.wardNo }}</td>
       <td>{{ w.municipalityId }}</td>
       <td>
         <button (click)="delete(w.id)">🗑️</button>

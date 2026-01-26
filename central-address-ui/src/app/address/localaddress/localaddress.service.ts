@@ -1,20 +1,27 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+import { LocalAddress, CreateLocalAddress } from '../../models/localaddress.model';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class LocalAddressService {
-  private http = inject(HttpClient);
-  private api = 'https://localhost:7181/api/LocalAddress';
 
-  getAll() {
-    return this.http.get<any[]>(this.api);
+  private apiUrl = 'https://localhost:5001/api/localaddress';
+
+  constructor(private http: HttpClient) {}
+
+  getAll(): Observable<LocalAddress[]> {
+    return this.http.get<LocalAddress[]>(this.apiUrl);
   }
 
-  create(data: any) {
-    return this.http.post(this.api, data);
+  create(data: CreateLocalAddress): Observable<LocalAddress> {
+    return this.http.post<LocalAddress>(this.apiUrl, data);
   }
 
-  delete(id: number) {
-    return this.http.delete(`${this.api}/${id}`);
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

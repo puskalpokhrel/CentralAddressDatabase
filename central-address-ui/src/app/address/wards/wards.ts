@@ -1,54 +1,68 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { WardsService } from './wards.service';
+import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+
+import { WardService } from './wards.service';
+import { MunicipalityService } from '../municipality/municipality.service';
+
+import { Ward, CreateWard } from '../../models/ward.model';
+import { Municipality } from '../../models/municipality.model';
 
 @Component({
   selector: 'app-wards',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './wards.html',
-  styleUrl: './wards.css'
+  templateUrl: './wards.html'
 })
-export class WardComponent implements OnInit {
+export class WardsComponent implements OnInit {
 
   private fb = inject(FormBuilder);
-  private service = inject(WardsService);
+  private wardService = inject(WardService);
+  private municipalityService = inject(MunicipalityService);
 
-  wards: any[] = [];
-  message = '';
+  wards: Ward[] = [];
+  municipalities: Municipality[] = [];
 
-  wardForm = this.fb.group({
-    wardNumber: ['', Validators.required],
-    municipalityId: ['', Validators.required]
+  wardForm = this.fb.nonNullable.group({
+    wardNumber: [0, Validators.required],
+    municipalityId: ['', Validators.required],
+    population: [0]
   });
 
   ngOnInit(): void {
     this.load();
+    this.loadMunicipalities();
   }
 
-  load() {
-    this.service.getAll().subscribe({
+  load(): void {
+    this.wardService.getAll().subscribe({
       next: res => this.wards = res,
       error: err => console.error(err)
     });
   }
 
-  submit() {
-    if (this.wardForm.invalid) return;
-
-    this.service.create(this.wardForm.value).subscribe({
-      next: () => {
-        this.message = 'Ward saved successfully ✅';
-        this.wardForm.reset();
-        this.load();
-      },
-      error: () => this.message = 'Failed to save ward ❌'
+  loadMunicipalities(): void {
+    this.municipalityService.getAll().subscribe({
+      next: res => this.municipalities = res,
+      error: err => console.error(err)
     });
   }
 
-  delete(id: number) {
-    if (!confirm('Delete this ward?')) return;
-    this.service.delete(id).subscribe(() => this.load());
+  submit(): void {
+    if (this.wardForm.invalid) return;
+
+    const payload: CreateWard = this.wardForm.getRawValue();
+
+    this.wardService.create(payload).subscribe({
+      next: () => {
+        this.wardForm.reset();
+        this.load();
+      },
+      error: err => console.error(err)
+    });
+  }
+
+  delete(id: string): void {
+    this.wardService.delete(id).subscribe(() => this.load());
   }
 }

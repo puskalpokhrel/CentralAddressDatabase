@@ -16,52 +16,17 @@
   <div class="main-layout">
     <!-- SIDEBAR -->
     <aside class="sidebar" [class.open]="sidebarOpen">
-      <a routerLink="/">🏠 Dashboard</a>
-      <a routerLink="/province">📍 Province</a>
-      <a routerLink="/district">🗺️ District</a>
-      <a routerLink="/municipality">🏘️ Municipality</a>
-      <a routerLink="/wards">🧩 Wards</a>
-      <a routerLink="/localaddress">🏡 Local Address</a>
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">🏠 Dashboard</a>
+      <a routerLink="/province" routerLinkActive="active">📍 Province</a>
+      <a routerLink="/district" routerLinkActive="active">🗺️ District</a>
+      <a routerLink="/municipality" routerLinkActive="active">🏘️ Municipality</a>
+      <a routerLink="/wards" routerLinkActive="active">🧩 Wards</a>
+      <a routerLink="/localaddress" routerLinkActive="active">🏡 Local Address</a>
     </aside>
 
     <!-- CONTENT -->
     <main class="content">
-      <!-- DASHBOARD -->
-      <h2>📊 Central Address Overview</h2>
-
-      <div class="card-grid">
-        <div class="card province" routerLink="/province">
-          <h3>📍 Provinces</h3>
-          <p class="count">7</p>
-          <span class="subtitle">Administrative Provinces</span>
-        </div>
-
-        <div class="card district" routerLink="/district">
-          <h3>🗺️ Districts</h3>
-          <p class="count">77</p>
-          <span class="subtitle">All District Records</span>
-        </div>
-
-        <div class="card municipality" routerLink="/municipality">
-          <h3>🏘️ Municipalities</h3>
-          <p class="count">753</p>
-          <span class="subtitle">Rural & Urban</span>
-        </div>
-
-        <div class="card ward" routerLink="/wards">
-          <h3>🧩 Wards</h3>
-          <p class="count">6,743</p>
-          <span class="subtitle">Local Ward Units</span>
-        </div>
-
-        <div class="card localaddress" routerLink="/localaddress">
-          <h3>🏡 Local Address</h3>
-          <p class="count">—</p>
-          <span class="subtitle">House-level Addressing</span>
-        </div>
-      </div>
-
-      <!-- ROUTED PAGES -->
+      <!-- ROUTES LOAD HERE -->
       <router-outlet></router-outlet>
     </main>
   </div>

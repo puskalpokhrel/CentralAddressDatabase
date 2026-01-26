@@ -1,7 +1,9 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+
 import { ProvinceService } from './province.service';
+import { Province, CreateProvince } from '../../models/province.model';
 
 @Component({
   selector: 'app-province',
@@ -10,36 +12,44 @@ import { ProvinceService } from './province.service';
   templateUrl: './province.html',
   styleUrl: './province.css'
 })
-export class ProvinceComponent {
+export class ProvinceComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private service = inject(ProvinceService);
 
-  provinceForm = this.fb.group({
+  provinces: Province[] = [];
+
+  provinceForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
     code: ['', [Validators.required, Validators.maxLength(3)]]
   });
 
-  loading = false;
-  message = '';
+  ngOnInit(): void {
+    this.load();
+  }
 
-  submit() {
+  load(): void {
+    this.service.getAll().subscribe({
+      next: (res: Province[]) => this.provinces = res,
+      error: err => console.error(err)
+    });
+  }
+
+  submit(): void {
     if (this.provinceForm.invalid) return;
 
-    this.loading = true;
-    this.message = '';
+    const payload: CreateProvince = this.provinceForm.getRawValue();
 
-    this.service.create(this.provinceForm.value).subscribe({
+    this.service.create(payload).subscribe({
       next: () => {
-        this.message = 'Province saved successfully ✅';
         this.provinceForm.reset();
-        this.loading = false;
+        this.load();
       },
-      error: err => {
-        console.error(err);
-        this.message = 'Failed to save province ❌';
-        this.loading = false;
-      }
+      error: err => console.error(err)
     });
+  }
+
+  delete(id: string): void {
+    this.service.delete(id).subscribe(() => this.load());
   }
 }
