@@ -1,4 +1,6 @@
 ﻿using CentralAddressDatabase.Data;
+using CentralAddressDatabase.DTOs;
+using CentralAddressDatabase.DTOs.Ward;
 using CentralAddressDatabase.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CentralAddressDatabase.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/ward")]
     public class WardController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -19,47 +21,32 @@ namespace CentralAddressDatabase.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _context.Wards
-                .Include(w => w.Municipality)
-                .ToListAsync());
+            var wards = await _context.Wards
+                .Select(w => new WardDto
+                {
+                    Id = w.Id,
+                    WardName = w.WardName,
+                    MunicipalityId = w.MunicipalityId
+                })
+                .ToListAsync();
+
+            return Ok(wards);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Ward ward)
+        public async Task<IActionResult> Create(CreateWardDto dto)
         {
-            if (!await _context.Municipalities.AnyAsync(m => m.Id == ward.MunicipalityId))
-                return BadRequest("Invalid MunicipalityId");
+            var ward = new Ward
+            {
+                Id = Guid.NewGuid(),
+                WardName = dto.WardName,
+                MunicipalityId = dto.MunicipalityId
+            };
 
-            ward.Id = Guid.NewGuid();
             _context.Wards.Add(ward);
             await _context.SaveChangesAsync();
 
-            return Ok(ward);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, Ward ward)
-        {
-            if (id != ward.Id)
-                return BadRequest();
-
-            _context.Entry(ward).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var ward = await _context.Wards.FindAsync(id);
-            if (ward == null)
-                return NotFound();
-
-            _context.Wards.Remove(ward);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return Ok();
         }
     }
 }

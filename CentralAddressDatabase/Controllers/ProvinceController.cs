@@ -1,4 +1,6 @@
 ﻿using CentralAddressDatabase.Data;
+using CentralAddressDatabase.DTOs;
+using CentralAddressDatabase.DTOs.Province;
 using CentralAddressDatabase.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CentralAddressDatabase.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/province")]
     public class ProvinceController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -16,71 +18,33 @@ namespace CentralAddressDatabase.Controllers
             _context = context;
         }
 
-        // GET: api/province
         [HttpGet]
-        public async Task<IActionResult> GetAllProvinces()
+        public async Task<IActionResult> GetAll()
         {
-            var provinces = await _context.Provinces.ToListAsync();
+            var provinces = await _context.Provinces
+                .Select(p => new ProvinceDto
+                {
+                    Id = p.Id,
+                    ProvinceName = p.ProvinceName
+                })
+                .ToListAsync();
+
             return Ok(provinces);
         }
 
-        // GET: api/province/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetProvinceById(Guid id)
-        {
-            var province = await _context.Provinces.FindAsync(id);
-
-            if (province == null)
-                return NotFound();
-
-            return Ok(province);
-        }
-
-        // POST: api/province
         [HttpPost]
-        public async Task<IActionResult> CreateProvince(Province province)
+        public async Task<IActionResult> Create(CreateProvinceDto dto)
         {
-            province.Id = Guid.NewGuid();
+            var province = new Province
+            {
+                Id = Guid.NewGuid(),
+                ProvinceName = dto.ProvinceName
+            };
 
             _context.Provinces.Add(province);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(
-                nameof(GetProvinceById),
-                new { id = province.Id },
-                province
-            );
-        }
-
-        // PUT: api/province/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProvince(Guid id, Province province)
-        {
-            if (id != province.Id)
-                return BadRequest("Province ID mismatch");
-
-            var exists = await _context.Provinces.AnyAsync(p => p.Id == id);
-            if (!exists)
-                return NotFound();
-
-            _context.Entry(province).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        // DELETE: api/province/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProvince(Guid id)
-        {
-            var province = await _context.Provinces.FindAsync(id);
-            if (province == null)
-                return NotFound();
-
-            _context.Provinces.Remove(province);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return Ok();
         }
     }
 }

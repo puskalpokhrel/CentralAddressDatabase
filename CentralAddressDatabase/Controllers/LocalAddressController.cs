@@ -1,4 +1,6 @@
 ﻿using CentralAddressDatabase.Data;
+using CentralAddressDatabase.DTOs;
+using CentralAddressDatabase.DTOs.LocalAddress;
 using CentralAddressDatabase.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CentralAddressDatabase.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/localaddress")]
     public class LocalAddressController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -19,47 +21,38 @@ namespace CentralAddressDatabase.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _context.LocalAddresses
-                .Include(a => a.Ward)
-                .ToListAsync());
+            var addresses = await _context.LocalAddresses
+                .Select(a => new LocalAddressDto
+                {
+                    Id = a.Id,
+                    HouseNumber = a.HouseNumber,
+                    StreetName = a.StreetName,
+                    AreaName = a.AreaName,
+                    PostalCode = a.PostalCode,
+                    WardId = a.WardId
+                })
+                .ToListAsync();
+
+            return Ok(addresses);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(LocalAddress address)
+        public async Task<IActionResult> Create(CreateLocalAddressDto dto)
         {
-            if (!await _context.Wards.AnyAsync(w => w.Id == address.WardId))
-                return BadRequest("Invalid WardId");
+            var address = new LocalAddress
+            {
+                Id = Guid.NewGuid(),
+                HouseNumber = dto.HouseNumber,
+                StreetName = dto.StreetName,
+                AreaName = dto.AreaName,
+                PostalCode = dto.PostalCode,
+                WardId = dto.WardId
+            };
 
-            address.Id = Guid.NewGuid();
             _context.LocalAddresses.Add(address);
             await _context.SaveChangesAsync();
 
-            return Ok(address);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, LocalAddress address)
-        {
-            if (id != address.Id)
-                return BadRequest();
-
-            _context.Entry(address).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var address = await _context.LocalAddresses.FindAsync(id);
-            if (address == null)
-                return NotFound();
-
-            _context.LocalAddresses.Remove(address);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return Ok();
         }
     }
 }

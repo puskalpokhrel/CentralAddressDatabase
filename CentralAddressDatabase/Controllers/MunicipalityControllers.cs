@@ -1,4 +1,6 @@
 ﻿using CentralAddressDatabase.Data;
+using CentralAddressDatabase.DTOs;
+using CentralAddressDatabase.DTOs.Municipality;
 using CentralAddressDatabase.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CentralAddressDatabase.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/municipality")]
     public class MunicipalityController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -19,47 +21,34 @@ namespace CentralAddressDatabase.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _context.Municipalities
-                .Include(m => m.District)
-                .ToListAsync());
+            var municipalities = await _context.Municipalities
+                .Select(m => new MunicipalityDto
+                {
+                    Id = m.Id,
+                    MunicipalityName = m.MunicipalityName,
+                    MunicipalityType = m.MunicipalityType,
+                    DistrictId = m.DistrictId
+                })
+                .ToListAsync();
+
+            return Ok(municipalities);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Municipality municipality)
+        public async Task<IActionResult> Create(CreateMunicipalityDto dto)
         {
-            if (!await _context.Districts.AnyAsync(d => d.Id == municipality.DistrictId))
-                return BadRequest("Invalid DistrictId");
+            var municipality = new Municipality
+            {
+                Id = Guid.NewGuid(),
+                MunicipalityName = dto.MunicipalityName,
+                MunicipalityType = dto.MunicipalityType,
+                DistrictId = dto.DistrictId
+            };
 
-            municipality.Id = Guid.NewGuid();
             _context.Municipalities.Add(municipality);
             await _context.SaveChangesAsync();
 
-            return Ok(municipality);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, Municipality municipality)
-        {
-            if (id != municipality.Id)
-                return BadRequest();
-
-            _context.Entry(municipality).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var municipality = await _context.Municipalities.FindAsync(id);
-            if (municipality == null)
-                return NotFound();
-
-            _context.Municipalities.Remove(municipality);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return Ok();
         }
     }
 }
