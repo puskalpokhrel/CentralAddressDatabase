@@ -1,52 +1,68 @@
 ﻿using CentralAddressDatabase.Data;
 using CentralAddressDatabase.DTOs;
-using CentralAddressDatabase.DTOs.District;
 using CentralAddressDatabase.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace CentralAddressDatabase.Controllers
+[ApiController]
+[Route("api/district")]
+public class DistrictController : ControllerBase
 {
-    [ApiController]
-    [Route("api/district")]
-    public class DistrictController : ControllerBase
+    private readonly ApplicationDbContext _context;
+
+    public DistrictController(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext _context;
+        _context = context;
+    }
 
-        public DistrictController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var districts = await _context.Districts
-                .Select(d => new DistrictDto
-                {
-                    Id = d.Id,
-                    DistrictName = d.DistrictName,
-                    ProvinceId = d.ProvinceId
-                })
-                .ToListAsync();
-
-            return Ok(districts);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create(CreateDistrictDto dto)
-        {
-            var district = new District
+    [HttpGet]
+    public async Task<IEnumerable<DistrictDto>> GetAll()
+    {
+        return await _context.Districts
+            .Select(d => new DistrictDto
             {
-                Id = Guid.NewGuid(),
-                DistrictName = dto.DistrictName,
-                ProvinceId = dto.ProvinceId
-            };
+                Id = d.Id,
+                DistrictName = d.DistrictName,
+                ProvinceId = d.ProvinceId
+            })
+            .ToListAsync();
+    }
 
-            _context.Districts.Add(district);
-            await _context.SaveChangesAsync();
+    [HttpPost]
+    public async Task<IActionResult> Create(DistrictDto dto)
+    {
+        _context.Districts.Add(new District
+        {
+            Id = Guid.NewGuid(),
+            DistrictName = dto.DistrictName,
+            ProvinceId = dto.ProvinceId
+        });
 
-            return Ok();
-        }
+        await _context.SaveChangesAsync();
+        return Ok();
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, DistrictDto dto)
+    {
+        var d = await _context.Districts.FindAsync(id);
+        if (d == null) return NotFound();
+
+        d.DistrictName = dto.DistrictName;
+        d.ProvinceId = dto.ProvinceId;
+
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var d = await _context.Districts.FindAsync(id);
+        if (d == null) return NotFound();
+
+        _context.Districts.Remove(d);
+        await _context.SaveChangesAsync();
+        return NoContent();
     }
 }
