@@ -14,7 +14,7 @@ namespace CentralAddressDatabase.Models
         public string AreaName { get; set; }
         public string PostalCode { get; set; }
 
-        [ForeignKey("Ward")]
+        [ForeignKey(nameof(Ward))]
         public Guid WardId { get; set; }
 
         public Ward Ward { get; set; }

@@ -10,13 +10,14 @@ namespace CentralAddressDatabase.Models
         [Key]
         public Guid Id { get; set; }
 
+        [Required]
         public string WardName { get; set; }
 
-        [ForeignKey("Municipality")]
+        [ForeignKey(nameof(Municipality))]
         public Guid MunicipalityId { get; set; }
 
         public Municipality Municipality { get; set; }
 
-        public ICollection<LocalAddress> LocalAddresses { get; set; }
+        public ICollection<LocalAddress> LocalAddresses { get; set; } = new List<LocalAddress>();
     }
 }

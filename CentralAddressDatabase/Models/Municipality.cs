@@ -15,11 +15,11 @@ namespace CentralAddressDatabase.Models
 
         public string MunicipalityType { get; set; }
 
-        [ForeignKey("District")]
+        [ForeignKey(nameof(District))]
         public Guid DistrictId { get; set; }
 
         public District District { get; set; }
 
-        public ICollection<Ward> Wards { get; set; }
+        public ICollection<Ward> Wards { get; set; } = new List<Ward>();
     }
 }

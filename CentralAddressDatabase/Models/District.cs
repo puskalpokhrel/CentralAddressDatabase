@@ -11,13 +11,13 @@ namespace CentralAddressDatabase.Models
         public Guid Id { get; set; }
 
         [Required]
-        public string DistrictName { get; set; } 
+        public string DistrictName { get; set; }
 
-        [ForeignKey("Province")]
+        [ForeignKey(nameof(Province))]
         public Guid ProvinceId { get; set; }
 
-        public Province Province { get; set; } 
+        public Province Province { get; set; }
 
-        public ICollection<Municipality> Municipalities { get; set; }
+        public ICollection<Municipality> Municipalities { get; set; } = new List<Municipality>();
     }
 }

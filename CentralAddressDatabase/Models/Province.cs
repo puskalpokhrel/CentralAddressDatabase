@@ -12,6 +12,6 @@ namespace CentralAddressDatabase.Models
         [Required]
         public string ProvinceName { get; set; }
 
-        public ICollection<District> Districts { get; set; }
+        public ICollection<District> Districts { get; set; } = new List<District>();
     }
 }
