@@ -1,4 +1,6 @@
-﻿namespace CentralAddressDatabase.DTOs.Province
+﻿using System;
+
+namespace CentralAddressDatabase.DTOs
 {
     public class ProvinceDto
     {
