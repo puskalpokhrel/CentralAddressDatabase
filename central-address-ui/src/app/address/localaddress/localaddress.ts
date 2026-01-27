@@ -1,96 +1,103 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-
-import { ProvinceService } from '../province/province.service';
-import { DistrictService } from '../district/district.service';
-import { MunicipalityService } from '../municipality/municipality.service';
-import { WardService } from '../wards/wards.service';
-
-import { Province } from '../../models/province.model';
-import { District } from '../../models/district.model';
-import { Municipality } from '../../models/municipality.model';
-import { Ward } from '../../models/ward.model';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-localaddress',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule
-  ],
+  imports: [CommonModule, FormsModule],
   templateUrl: './localaddress.html'
 })
 export class LocalAddressComponent implements OnInit {
+  apiUrl = 'https://localhost:7181/api/localaddress';
 
-  localAddressForm!: FormGroup;
+  localAddresses: any[] = [];
+  wards: any[] = [];
 
-  provinces: Province[] = [];
-  districts: District[] = [];
-  municipalities: Municipality[] = [];
-  wards: Ward[] = [];
+  houseNumber = '';
+  streetName = '';
+  areaName = '';
+  postalCode = '';
+  wardId = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private provinceService: ProvinceService,
-    private districtService: DistrictService,
-    private municipalityService: MunicipalityService,
-    private wardService: WardService
-  ) {}
+  editingId: string | null = null;
 
-  ngOnInit(): void {
-    this.localAddressForm = this.fb.group({
-      provinceId: ['', Validators.required],
-      districtId: ['', Validators.required],
-      municipalityId: ['', Validators.required],
-      wardId: ['', Validators.required],
-      tole: ['', [Validators.required, Validators.minLength(3)]],
-      street: [''],
-      houseNo: ['', Validators.required]
-    });
+  constructor(private http: HttpClient) {}
 
-    this.loadProvinces();
+  ngOnInit() {
+    this.loadLocalAddresses();
+    this.loadWards();
   }
 
-  loadProvinces() {
-    this.provinceService.getAll().subscribe(res => {
-      this.provinces = res;
+  loadLocalAddresses() {
+    this.http.get<any[]>(this.apiUrl).subscribe(res => {
+      this.localAddresses = res;
     });
   }
 
-  onProvinceChange() {
-    const provinceId = this.localAddressForm.value.provinceId;
-    if (!provinceId) return;
+  loadWards() {
+    this.http
+      .get<any[]>('https://localhost:7181/api/ward')
+      .subscribe(res => {
+        this.wards = res;
+      });
+  }
 
-    this.districtService.getByProvince(provinceId).subscribe(res => {
-      this.districts = res;
-      this.municipalities = [];
-      this.wards = [];
+  /** 🔑 MAP wardId → wardName */
+  getWardName(id: string): string {
+    const w = this.wards.find(x => x.id === id);
+    return w ? w.wardName : '';
+  }
+
+  save() {
+    const payload = {
+      id: this.editingId ?? '00000000-0000-0000-0000-000000000000',
+      houseNumber: this.houseNumber,
+      streetName: this.streetName,
+      areaName: this.areaName,
+      postalCode: this.postalCode,
+      wardId: this.wardId
+    };
+
+    if (this.editingId) {
+      this.http
+        .put(`${this.apiUrl}/${this.editingId}`, payload)
+        .subscribe(() => {
+          this.loadLocalAddresses();
+          this.reset();
+        });
+    } else {
+      this.http.post(this.apiUrl, payload).subscribe(() => {
+        this.loadLocalAddresses();
+        this.reset();
+      });
+    }
+  }
+
+  edit(a: any) {
+    this.editingId = a.id;
+    this.houseNumber = a.houseNumber;
+    this.streetName = a.streetName;
+    this.areaName = a.areaName;
+    this.postalCode = a.postalCode;
+    this.wardId = a.wardId;
+  }
+
+  delete(id: string) {
+    if (!confirm('Delete this address?')) return;
+
+    this.http.delete(`${this.apiUrl}/${id}`).subscribe(() => {
+      this.loadLocalAddresses();
     });
   }
 
-  onDistrictChange() {
-    const districtId = this.localAddressForm.value.districtId;
-    if (!districtId) return;
-
-    this.municipalityService.getByDistrict(districtId).subscribe(res => {
-      this.municipalities = res;
-      this.wards = [];
-    });
-  }
-
-  onMunicipalityChange() {
-    const municipalityId = this.localAddressForm.value.municipalityId;
-    if (!municipalityId) return;
-
-    this.wardService.getByMunicipality(municipalityId).subscribe(res => {
-      this.wards = res;
-    });
-  }
-
-  submit() {
-    if (this.localAddressForm.invalid) return;
-
-    console.log(this.localAddressForm.value);
+  reset() {
+    this.editingId = null;
+    this.houseNumber = '';
+    this.streetName = '';
+    this.areaName = '';
+    this.postalCode = '';
+    this.wardId = '';
   }
 }

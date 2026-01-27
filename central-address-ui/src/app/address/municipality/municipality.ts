@@ -1,69 +1,113 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 
-import { MunicipalityService } from './municipality.service';
-import { DistrictService } from '../district/district.service';
+interface Municipality {
+  id: string;
+  municipalityName: string;
+  municipalityType: string;
+  districtId: string;
+}
 
-import { Municipality, CreateMunicipality } from '../../models/municipality.model';
-import { District } from '../../models/district.model';
+interface District {
+  id: string;
+  districtName: string;
+  provinceId: string;
+}
 
 @Component({
   selector: 'app-municipality',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './municipality.html'
 })
 export class MunicipalityComponent implements OnInit {
 
-  private fb = inject(FormBuilder);
-  private municipalityService = inject(MunicipalityService);
-  private districtService = inject(DistrictService);
+  // API URLs (port 7181)
+  private municipalityUrl = 'https://localhost:7181/api/municipality';
+  private districtUrl = 'https://localhost:7181/api/district';
 
   municipalities: Municipality[] = [];
   districts: District[] = [];
 
-  municipalityForm = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.minLength(3)]],
-    type: ['', Validators.required],
-    code: ['', [Validators.required, Validators.maxLength(4)]],
-    districtId: ['', Validators.required]
-  });
+  // form fields
+  municipalityName = '';
+  municipalityType = '';
+  districtId = '';
+
+  editingId: string | null = null;
+
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.load();
     this.loadDistricts();
+    this.loadMunicipalities();
   }
 
-  load(): void {
-    this.municipalityService.getAll().subscribe({
-      next: res => this.municipalities = res,
-      error: err => console.error(err)
-    });
+  // ---------------- LOAD DATA ----------------
+
+  loadMunicipalities() {
+    this.http.get<Municipality[]>(this.municipalityUrl)
+      .subscribe(res => this.municipalities = res);
   }
 
-  loadDistricts(): void {
-    this.districtService.getAll().subscribe({
-      next: res => this.districts = res,
-      error: err => console.error(err)
-    });
+  loadDistricts() {
+    this.http.get<District[]>(this.districtUrl)
+      .subscribe(res => this.districts = res);
   }
 
-  submit(): void {
-    if (this.municipalityForm.invalid) return;
+  // ---------------- DISPLAY HELPERS ----------------
 
-    const payload: CreateMunicipality = this.municipalityForm.getRawValue();
-
-    this.municipalityService.create(payload).subscribe({
-      next: () => {
-        this.municipalityForm.reset();
-        this.load();
-      },
-      error: err => console.error(err)
-    });
+  getDistrictName(districtId: string): string {
+    const district = this.districts.find(d => d.id === districtId);
+    return district ? district.districtName : '';
   }
 
-  delete(id: string): void {
-    this.municipalityService.delete(id).subscribe(() => this.load());
+  // ---------------- CRUD ----------------
+
+  save() {
+    const payload = {
+      municipalityName: this.municipalityName,
+      municipalityType: this.municipalityType,
+      districtId: this.districtId
+    };
+
+    if (this.editingId) {
+      this.http.put(
+        `${this.municipalityUrl}/${this.editingId}`,
+        payload
+      ).subscribe(() => {
+        this.resetForm();
+        this.loadMunicipalities();
+      });
+    } else {
+      this.http.post(this.municipalityUrl, payload)
+        .subscribe(() => {
+          this.resetForm();
+          this.loadMunicipalities();
+        });
+    }
+  }
+
+  edit(m: Municipality) {
+    this.editingId = m.id;
+    this.municipalityName = m.municipalityName;
+    this.municipalityType = m.municipalityType;
+    this.districtId = m.districtId;
+  }
+
+  delete(id: string) {
+    if (!confirm('Delete this municipality?')) return;
+
+    this.http.delete(`${this.municipalityUrl}/${id}`)
+      .subscribe(() => this.loadMunicipalities());
+  }
+
+  resetForm() {
+    this.editingId = null;
+    this.municipalityName = '';
+    this.municipalityType = '';
+    this.districtId = '';
   }
 }

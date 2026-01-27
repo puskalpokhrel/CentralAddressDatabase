@@ -1,55 +1,78 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 
 import { ProvinceService } from './province.service';
-import { Province, CreateProvince } from '../../models/province.model';
+import { Province } from '../../models/province.model';
 
 @Component({
-  selector: 'app-province',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './province.html',
-  styleUrl: './province.css'
+  selector: 'app-province',
+  imports: [CommonModule, FormsModule],
+  templateUrl: './province.html'
 })
 export class ProvinceComponent implements OnInit {
 
-  private fb = inject(FormBuilder);
-  private service = inject(ProvinceService);
-
   provinces: Province[] = [];
+  provinceName: string = '';
+  editingId: string | null = null;
 
-  provinceForm = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.minLength(3)]],
-    code: ['', [Validators.required, Validators.maxLength(3)]]
-  });
+  constructor(private provinceService: ProvinceService) {}
 
   ngOnInit(): void {
-    this.load();
+    this.loadProvinces();
   }
 
-  load(): void {
-    this.service.getAll().subscribe({
-      next: (res: Province[]) => this.provinces = res,
-      error: err => console.error(err)
-    });
-  }
-
-  submit(): void {
-    if (this.provinceForm.invalid) return;
-
-    const payload: CreateProvince = this.provinceForm.getRawValue();
-
-    this.service.create(payload).subscribe({
-      next: () => {
-        this.provinceForm.reset();
-        this.load();
+  loadProvinces(): void {
+    this.provinceService.getAll().subscribe({
+      next: (data) => {
+        this.provinces = data;
       },
-      error: err => console.error(err)
+      error: (err) => {
+        console.error('Failed to load provinces', err);
+      }
     });
+  }
+
+  save(): void {
+    if (!this.provinceName.trim()) {
+      return;
+    }
+
+    if (this.editingId) {
+      this.provinceService
+        .update(this.editingId, { provinceName: this.provinceName })
+        .subscribe(() => {
+          this.resetForm();
+          this.loadProvinces();
+        });
+    } else {
+      this.provinceService
+        .create({ provinceName: this.provinceName })
+        .subscribe(() => {
+          this.resetForm();
+          this.loadProvinces();
+        });
+    }
+  }
+
+  edit(province: Province): void {
+    this.editingId = province.id;
+    this.provinceName = province.provinceName;
   }
 
   delete(id: string): void {
-    this.service.delete(id).subscribe(() => this.load());
+    if (!confirm('Delete this province?')) {
+      return;
+    }
+
+    this.provinceService.delete(id).subscribe(() => {
+      this.loadProvinces();
+    });
+  }
+
+  resetForm(): void {
+    this.provinceName = '';
+    this.editingId = null;
   }
 }

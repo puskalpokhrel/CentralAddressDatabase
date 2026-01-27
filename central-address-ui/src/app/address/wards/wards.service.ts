@@ -1,41 +1,53 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Ward } from '../../models/ward.model';
+
+export interface Ward {
+  id: string;
+  wardNumber: number;
+  municipalityId: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
-export class WardService {
+export class WardsService {
 
-  private apiUrl = 'https://localhost:5001/api/ward';
+  private baseUrl = 'https://localhost:7181/api/ward';
 
   constructor(private http: HttpClient) {}
 
-  // GET: api/ward
+  // ---------------- GET ALL ----------------
   getAll(): Observable<Ward[]> {
-    return this.http.get<Ward[]>(this.apiUrl);
+    return this.http.get<Ward[]>(this.baseUrl);
   }
 
-  // GET: api/ward/{id}
+  // ---------------- GET BY ID ----------------
   getById(id: string): Observable<Ward> {
-    return this.http.get<Ward>(`${this.apiUrl}/${id}`);
+    return this.http.get<Ward>(`${this.baseUrl}/${id}`);
   }
 
-  // GET: api/ward/by-municipality/{municipalityId}
-  getByMunicipality(municipalityId: string): Observable<Ward[]> {
-    return this.http.get<Ward[]>(
-      `${this.apiUrl}/by-municipality/${municipalityId}`
-    );
+  // ---------------- CREATE ----------------
+  create(payload: {
+    wardNumber: number;
+    municipalityId: string;
+  }): Observable<any> {
+    return this.http.post(this.baseUrl, payload);
   }
 
-  // POST: api/ward
-  create(data: Partial<Ward>): Observable<Ward> {
-    return this.http.post<Ward>(this.apiUrl, data);
+  // ---------------- UPDATE ----------------
+  update(
+    id: string,
+    payload: {
+      wardNumber: number;
+      municipalityId: string;
+    }
+  ): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${id}`, payload);
   }
 
-  // DELETE: api/ward/{id}
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  // ---------------- DELETE ----------------
+  delete(id: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${id}`);
   }
 }

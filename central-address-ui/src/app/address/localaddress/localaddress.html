@@ -1,121 +1,44 @@
 <h2>🏠 Local Address Management</h2>
-<p>Complete address details linked to province, district, municipality and ward.</p>
 
-<div class="form-card">
-  <div class="form-title">Add Local Address</div>
+<table class="table">
+  <tr>
+    <th>#</th>
+    <th>House No</th>
+    <th>Street</th>
+    <th>Area</th>
+    <th>Postal Code</th>
+    <th>Ward</th>
+    <th>Action</th>
+  </tr>
 
-  <form [formGroup]="localAddressForm" (ngSubmit)="submit()">
+  <tr *ngFor="let a of localAddresses; index as i">
+    <td>{{ i + 1 }}</td>
+    <td>{{ a.houseNumber }}</td>
+    <td>{{ a.streetName }}</td>
+    <td>{{ a.areaName }}</td>
+    <td>{{ a.postalCode }}</td>
+    <td>{{ getWardName(a.wardId) }}</td>
+    <td>
+      <button (click)="edit(a)">Edit</button>
+      <button (click)="delete(a.id)">Delete</button>
+    </td>
+  </tr>
+</table>
 
-    <!-- Province -->
-    <div class="form-group">
-      <label>Province</label>
-      <select
-        formControlName="provinceId"
-        (change)="onProvinceChange()"
-      >
-        <option value="">Select Province</option>
-        <option *ngFor="let p of provinces" [value]="p.id">
-          {{ p.name }}
-        </option>
-      </select>
+<h3>{{ editingId ? 'Edit' : 'Add' }} Local Address</h3>
 
-      <div class="error"
-        *ngIf="localAddressForm.controls['provinceId'].touched
-            && localAddressForm.controls['provinceId'].invalid">
-        Province is required
-      </div>
-    </div>
+<input [(ngModel)]="houseNumber" placeholder="House Number" />
+<input [(ngModel)]="streetName" placeholder="Street Name" />
+<input [(ngModel)]="areaName" placeholder="Area Name" />
+<input [(ngModel)]="postalCode" placeholder="Postal Code" />
 
-    <!-- District -->
-    <div class="form-group">
-      <label>District</label>
-      <select
-        formControlName="districtId"
-        (change)="onDistrictChange()"
-      >
-        <option value="">Select District</option>
-        <option *ngFor="let d of districts" [value]="d.id">
-          {{ d.name }}
-        </option>
-      </select>
+<select [(ngModel)]="wardId">
+  <option value="">Select Ward</option>
+  <option *ngFor="let w of wards" [value]="w.id">
+    {{ w.wardName }}
+  </option>
+</select>
 
-      <div class="error"
-        *ngIf="localAddressForm.controls['districtId'].touched
-            && localAddressForm.controls['districtId'].invalid">
-        District is required
-      </div>
-    </div>
-
-    <!-- Municipality -->
-    <div class="form-group">
-      <label>Municipality</label>
-      <select
-        formControlName="municipalityId"
-        (change)="onMunicipalityChange()"
-      >
-        <option value="">Select Municipality</option>
-        <option *ngFor="let m of municipalities" [value]="m.id">
-          {{ m.name }}
-        </option>
-      </select>
-
-      <div class="error"
-        *ngIf="localAddressForm.controls['municipalityId'].touched
-            && localAddressForm.controls['municipalityId'].invalid">
-        Municipality is required
-      </div>
-    </div>
-
-    <!-- Ward -->
-    <div class="form-group">
-      <label>Ward</label>
-      <select formControlName="wardId">
-        <option value="">Select Ward</option>
-        <option *ngFor="let w of wards" [value]="w.id">
-          {{ w.wardNo }}
-        </option>
-      </select>
-
-      <div class="error"
-        *ngIf="localAddressForm.controls['wardId'].touched
-            && localAddressForm.controls['wardId'].invalid">
-        Ward is required
-      </div>
-    </div>
-
-    <!-- Tole -->
-    <div class="form-group">
-      <label>Tole</label>
-      <input type="text" formControlName="tole">
-
-      <div class="error"
-        *ngIf="localAddressForm.controls['tole'].touched
-            && localAddressForm.controls['tole'].invalid">
-        Minimum 3 characters required
-      </div>
-    </div>
-
-    <!-- Street -->
-    <div class="form-group">
-      <label>Street</label>
-      <input type="text" formControlName="street">
-    </div>
-
-    <!-- House No -->
-    <div class="form-group">
-      <label>House No</label>
-      <input type="text" formControlName="houseNo">
-
-      <div class="error"
-        *ngIf="localAddressForm.controls['houseNo'].touched
-            && localAddressForm.controls['houseNo'].invalid">
-        House number is required
-      </div>
-    </div>
-
-    <button class="submit-btn" [disabled]="localAddressForm.invalid">
-      Save Address
-    </button>
-
-  </form>
-</div>
+<button (click)="save()">
+  {{ editingId ? 'Update' : 'Save' }}
+</button>

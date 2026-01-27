@@ -1,15 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Province, CreateProvince } from '../../models/province.model';
+import { Province } from '../../models/province.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ProvinceService {
-
-  private apiUrl = 'https://localhost:5001/api/province'; 
-  // 🔁 change port if needed
+  private apiUrl = 'https://localhost:7181/api/province';
 
   constructor(private http: HttpClient) {}
 
@@ -17,12 +13,12 @@ export class ProvinceService {
     return this.http.get<Province[]>(this.apiUrl);
   }
 
-  getById(id: string): Observable<Province> {
-    return this.http.get<Province>(`${this.apiUrl}/${id}`);
+  create(data: { provinceName: string }): Observable<void> {
+    return this.http.post<void>(this.apiUrl, data);
   }
 
-  create(data: CreateProvince): Observable<Province> {
-    return this.http.post<Province>(this.apiUrl, data);
+  update(id: string, data: { provinceName: string }): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}`, data);
   }
 
   delete(id: string): Observable<void> {

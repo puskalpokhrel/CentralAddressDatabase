@@ -1,68 +1,90 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-
-import { WardService } from './wards.service';
-import { MunicipalityService } from '../municipality/municipality.service';
-
-import { Ward, CreateWard } from '../../models/ward.model';
-import { Municipality } from '../../models/municipality.model';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-wards',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './wards.html'
 })
-export class WardsComponent implements OnInit {
+export class WardComponent implements OnInit {
+  apiUrl = 'https://localhost:7181/api/ward';
 
-  private fb = inject(FormBuilder);
-  private wardService = inject(WardService);
-  private municipalityService = inject(MunicipalityService);
+  wards: any[] = [];
+  municipalities: any[] = [];
 
-  wards: Ward[] = [];
-  municipalities: Municipality[] = [];
+  wardName = '';
+  municipalityId = '';
+  editingId: string | null = null;
 
-  wardForm = this.fb.nonNullable.group({
-    wardNumber: [0, Validators.required],
-    municipalityId: ['', Validators.required],
-    population: [0]
-  });
+  constructor(private http: HttpClient) {}
 
-  ngOnInit(): void {
-    this.load();
+  ngOnInit() {
+    this.loadWards();
     this.loadMunicipalities();
   }
 
-  load(): void {
-    this.wardService.getAll().subscribe({
-      next: res => this.wards = res,
-      error: err => console.error(err)
+  loadWards() {
+    this.http.get<any[]>(this.apiUrl).subscribe(res => {
+      this.wards = res;
     });
   }
 
-  loadMunicipalities(): void {
-    this.municipalityService.getAll().subscribe({
-      next: res => this.municipalities = res,
-      error: err => console.error(err)
+  loadMunicipalities() {
+    this.http
+      .get<any[]>('https://localhost:7181/api/municipality')
+      .subscribe(res => {
+        this.municipalities = res;
+      });
+  }
+
+  /** 🔑 KEY FUNCTION */
+  getMunicipalityName(id: string): string {
+    const m = this.municipalities.find(x => x.id === id);
+    return m ? m.municipalityName : '';
+  }
+
+  save() {
+    const payload = {
+      id: this.editingId ?? '00000000-0000-0000-0000-000000000000',
+      wardName: this.wardName,
+      municipalityId: this.municipalityId
+    };
+
+    if (this.editingId) {
+      this.http
+        .put(`${this.apiUrl}/${this.editingId}`, payload)
+        .subscribe(() => {
+          this.loadWards();
+          this.reset();
+        });
+    } else {
+      this.http.post(this.apiUrl, payload).subscribe(() => {
+        this.loadWards();
+        this.reset();
+      });
+    }
+  }
+
+  edit(w: any) {
+    this.editingId = w.id;
+    this.wardName = w.wardName;
+    this.municipalityId = w.municipalityId;
+  }
+
+  delete(id: string) {
+    if (!confirm('Delete this ward?')) return;
+
+    this.http.delete(`${this.apiUrl}/${id}`).subscribe(() => {
+      this.loadWards();
     });
   }
 
-  submit(): void {
-    if (this.wardForm.invalid) return;
-
-    const payload: CreateWard = this.wardForm.getRawValue();
-
-    this.wardService.create(payload).subscribe({
-      next: () => {
-        this.wardForm.reset();
-        this.load();
-      },
-      error: err => console.error(err)
-    });
-  }
-
-  delete(id: string): void {
-    this.wardService.delete(id).subscribe(() => this.load());
+  reset() {
+    this.editingId = null;
+    this.wardName = '';
+    this.municipalityId = '';
   }
 }

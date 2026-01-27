@@ -24,7 +24,7 @@ export const routes: Routes = [
   {
     path: 'wards',
     loadComponent: () =>
-      import('./address/wards/wards').then(m => m.WardsComponent)
+      import('./address/wards/wards').then(m => m.WardComponent)
   },
   {
     path: 'localaddress',
